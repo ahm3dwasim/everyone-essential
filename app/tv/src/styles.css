@@ -1,0 +1,1060 @@
+/*
+ * 10-foot UI. Sized for 1920x1080 but written in relative units so the same
+ * page is legible in a desktop browser at half that.
+ *
+ * Two rules are load-bearing here:
+ *   - the focus ring is at least 6px and always visible (8px + offset), and
+ *   - contrast is high: near-white text on a dark ground, no thin greys.
+ */
+/*
+ * Design tokens: a cool blue ground, warm paper text, amber reserved for the
+ * remote's focus. Contrast figures are sRGB calculations against Surface
+ * (12.13:1 main text, 8.22:1 secondary, 9.30:1 focus, 8.30:1 success,
+ * 6.90:1 error).
+ */
+:root {
+  --ink: #f1efe7;
+  --ink-dim: #bcc8d6;
+  --ground: #141c28;
+  --panel: #202d3d;
+  --panel-2: #202d3d;
+  --line: #33415470;
+  /* the control edge: a 3px boundary, only where a control boundary is needed */
+  --edge: #8294ad;
+  --accent: #f2cf7a;
+  --ok: #92d5be;
+  --bad: #f1a29a;
+  --focus: #f2cf7a;
+  /*
+   * The plate's own reserve boundary: raster x=800 of a 1280 master is the
+   * flat right-hand UI reserve. `object-fit: cover` never crops the sides at
+   * a landscape viewport, so this fraction is exact at any width:
+   * 800/1280 = 62.5%. `.rail-shell` is everything right of it; the painting is
+   * everything left of it, and never carries UI text (see `plate.css`).
+   */
+  --rail-x: 62.5vw;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* rem tracks the viewport: 16px at 1920x1080, 7px on the Stick's 960x480 Silk viewport (DPR 4). */
+html {
+  font-size: min(0.8333vw, 1.4815vh);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Helvetica Neue", Arial, system-ui, sans-serif;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+.tv {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/*
+ * The painted room is a fixed full-bleed layer behind everything (see
+ * `plate.css`). Every surface that shows UI over it -- the lobby, ordinary
+ * play, the ending -- confines its content to `.rail-shell`: a fixed panel
+ * covering only the right-hand reserve the plate was painted with, so no text
+ * is ever laid out over the painting itself. Sheets, the rebuild moment, the
+ * leave prompt and refusals still use the full-screen `.overlay`
+ * further down -- a deliberate scope choice: those are transient and already
+ * opaque, so confining them to the rail buys nothing.
+ */
+.rail-shell {
+  position: fixed;
+  top: 0;
+  left: var(--rail-x);
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  background: var(--ground);
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  padding: 1.6vh 1.4vw;
+  overflow-y: auto;
+}
+
+/* ---------------- top bar ---------------- */
+
+/*
+ * `<main>` precedes `<header>` in DOM order inside `.rail-shell.playing`
+ * (app.tsx: a header utility button must never be where the ring defaults to
+ * when the board itself has something to act on), so the visual order is
+ * pinned here instead of left to source order.
+ */
+.rail-shell.playing {
+  display: flex;
+  flex-direction: column;
+}
+
+.rail-shell.playing .stage {
+  order: 2;
+}
+
+.rail-shell.playing .topbar {
+  order: 1;
+}
+
+.rail-shell.playing .footer {
+  order: 3;
+}
+
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.3rem;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* a small focusable text button, used for the entry points to a sheet:
+   Players & help, Clues found, How we checked */
+.mini {
+  background: var(--panel-2);
+  border: 2px solid var(--edge);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-size: 1.1rem;
+  color: var(--ink-dim);
+  font: inherit;
+}
+
+.players-help-open {
+  margin-left: auto;
+}
+
+/* ---------------- stage: the rail's own board column ---------------- */
+
+.stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  overflow-y: auto;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-height: 0;
+}
+
+.rail-utility {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.fact {
+  background: var(--panel-2);
+  border: 2px solid var(--edge);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-size: 1.3rem;
+}
+
+.facts-empty {
+  color: var(--ink-dim);
+  font-size: 1.3rem;
+}
+
+/* the one latest event, not a four-line accumulating log --
+   the rest lives behind "Clues found" */
+.latest-event {
+  font-size: 1.15rem;
+  color: var(--ink-dim);
+  min-height: 1.6em;
+}
+
+/* ---------------- badge (technical details / phone wire only) --------- */
+
+.badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+}
+
+.badge-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.4rem;
+  background: var(--panel-2);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+}
+
+.badge-line[data-ok="true"] .tick {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.badge-line[data-ok="false"] {
+  color: var(--bad);
+}
+
+.badge-line[data-ok="false"] .tick {
+  font-weight: 700;
+}
+
+.check-reference {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1rem;
+  color: var(--ink-dim);
+}
+
+/* ---------------- how we checked --------------------------------------- */
+
+.how-we-checked {
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 52ch;
+}
+
+.checked-headline {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.checked-context,
+.checked-still-needs,
+.checked-explain,
+.checked-explain-more,
+.checked-caveats {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 1.1rem;
+}
+
+.checked-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 1.2rem;
+  padding: 0.3rem 0;
+}
+
+.checked-line[data-state="yes"] .checked-label {
+  color: var(--ok);
+}
+
+.checked-line[data-state="no"] .checked-label {
+  color: var(--bad);
+}
+
+.checked-line[data-state="unknown"] .checked-label {
+  color: var(--ink);
+}
+
+.checked-evidence {
+  color: var(--ink-dim);
+  text-align: right;
+}
+
+.how-we-checked-sheet .how-we-checked-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  max-width: 60ch;
+  margin: auto;
+}
+
+/* ---------------- board ---------------- */
+
+.board {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.board-title {
+  font-size: 1.4rem;
+  color: var(--ink-dim);
+  margin-bottom: 0.8rem;
+}
+
+/* Stacked one per row: the rail is the reserve's 37.5% of the screen, not a
+   full-width dashboard, so cards read top to bottom rather than across. */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.board[data-count="1"] .cards {
+  grid-template-columns: 1fr;
+  height: 100%;
+}
+
+.board[data-count="1"] .card {
+  height: 100%;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.board[data-count="1"] .card-label {
+  font-size: 2rem;
+}
+
+.card {
+  position: relative;
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 1.4rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 5.6rem;
+}
+
+.card[data-on-remote="true"] {
+  border: 3px solid var(--edge);
+}
+
+.card[data-waiting="true"] {
+  opacity: 0.65;
+}
+
+.card-role {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.card-label {
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.card-meta {
+  /* A step under `.card-label`'s 1.35rem: this is exactly what says whose
+     phone (or the remote) an action is on, and a player needs to read it
+     from the couch, not just the choice text -- but it stays a step under
+     the choice text so it still reads as secondary, not equal to it. */
+  font-size: 1.25rem;
+  color: var(--ink-dim);
+  margin-top: auto;
+}
+
+/* the focus ring: 8px, always at least the required 6px minimum */
+[data-focused="true"] {
+  outline: 8px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.option {
+  background: var(--panel-2);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 1.1rem;
+  font-size: 1.4rem;
+  min-height: 5rem;
+  display: flex;
+  align-items: center;
+}
+
+.board-hint {
+  margin-top: 0.8rem;
+  color: var(--ink-dim);
+  font-size: 1.1rem;
+}
+
+/* ---------------- footer ---------------- */
+
+.footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 3rem;
+}
+
+.notice {
+  background: #33211d;
+  border: 2px solid var(--bad);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-size: 1.35rem;
+  color: #ffd9d2;
+}
+
+.footer-hint {
+  /* Same couch-distance sizing as `.card-meta`: a player needs this line to
+     know what the remote does right now, so it is not well under the choice
+     text's 1.35rem. */
+  color: var(--ink-dim);
+  font-size: 1.25rem;
+}
+
+/* ---------------- a dropped teammate's seat, on screen until it is back ---- */
+
+.held-seats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.held-seat {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: #33211d;
+  border: 2px solid var(--bad);
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
+}
+
+.held-seat-role {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--bad);
+}
+
+.held-seat-text {
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+/* ---------------- overlays ---------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ground);
+  display: flex;
+  padding: 3vh 3vw;
+  gap: 3vw;
+  overflow-y: auto;
+  z-index: 3;
+}
+
+/* the lobby and the ending are `.rail-shell` (confined to the reserve beside
+   the plate), not `.overlay` (full-screen, opaque) -- see `.rail-shell` above.
+   Both stack their content in a single narrower column. */
+.lobby,
+.ending {
+  align-items: stretch;
+}
+
+/* ---------------- the mystery picker ---------------- */
+
+.mysteries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mysteries-label {
+  font-size: 1.1rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Stacked one per row: the rail is narrow, and a vertical list is also the
+   simpler D-pad walk (up/down only). */
+.mystery-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mystery-option {
+  min-height: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  width: 100%;
+}
+
+.mystery-option[data-current="true"] {
+  border-color: var(--focus);
+  background: var(--panel);
+}
+
+.mystery-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.mystery-size {
+  font-size: 1.1rem;
+  color: var(--ink-dim);
+}
+
+.mystery-generated {
+  /* Was 0.85rem -- ~6 CSS px at the Stick's real 960x480 viewport, where
+     1rem is 7px. Raised to the choice
+     text's own size, same as every other couch-distance fix on this sheet. */
+  font-size: 1.35rem;
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.05rem 0.4rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 2.2rem;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+.room-label {
+  font-size: 1.05rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.room-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 2.6rem;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.slots {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.slot {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+  flex: 1 1 11rem;
+  min-width: 0;
+}
+
+.slot[data-joined="true"] {
+  border-color: var(--ok);
+}
+
+.slot-role {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.slot-who {
+  font-size: 1.15rem;
+}
+
+.slot-mode {
+  /* Same couch-distance fix as `.card-meta`: was 1rem, ~7 CSS px at the
+     Stick's real viewport. */
+  font-size: 1.25rem;
+  color: var(--ok);
+}
+
+.slot-blurb {
+  font-size: 1.25rem;
+  color: var(--ink-dim);
+}
+
+.change-role-hint {
+  font-size: 1.25rem;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+/* ---------------- scan to join ---------------- */
+
+.join-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 2px solid var(--line);
+}
+
+.join-heading {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.join-sub {
+  /* Same couch-distance fix as `.card-meta`: was 1.05rem, ~7.3 CSS px at the
+     Stick's real viewport. */
+  font-size: 1.25rem;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+.qr-frame {
+  align-self: center;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
+  width: min(220px, 90%);
+}
+
+.qr-frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.phone-address {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.25rem;
+  color: var(--ink-dim);
+  word-break: break-all;
+  text-align: center;
+}
+
+.hint,
+.status {
+  /* Same couch-distance fix as `.card-meta`: was 1.05rem, ~7.3 CSS px at the
+     Stick's real viewport. */
+  font-size: 1.25rem;
+  color: var(--ink-dim);
+  text-align: center;
+  margin: 0;
+}
+
+/* ---------------- the rebuild moment ------------------------------------ */
+
+/*
+ * An opaque full-screen `.overlay` would, on a 1920x1080 frame, leave a
+ * small paragraph pinned in the upper-left corner of an otherwise empty
+ * black screen, for the product's own headline beat -- the painted room.
+ * `.rail-shell` here, like every other surface: the painted room stays
+ * visible behind it, and the content is confined to the same right-hand
+ * reserve as the lobby, the board and the ending (`--rail-x`).
+ */
+.rebuild-moment {
+  justify-content: center;
+  gap: 1.4rem;
+}
+
+.rebuild-beat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  /* transform/opacity only */
+  animation: rebuild-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rebuild-beat {
+    animation: none;
+  }
+}
+
+@keyframes rebuild-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rebuild-marker {
+  align-self: flex-start;
+  background: var(--panel);
+  border: 3px solid var(--edge);
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.rebuild-headline,
+.rebuild-payoff {
+  font-size: 2.2rem;
+  margin: 0;
+}
+
+.rebuild-payoff {
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+.rebuild-task-title {
+  font-size: 1.4rem;
+  color: var(--ink-dim);
+}
+
+.rebuild-shape-line,
+.rebuild-status,
+.rebuild-secondary {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 1.2rem;
+}
+
+/* Who the room is waiting for, on every rebuild beat that
+   does not already say it inside "how we checked". Amber, like the role
+   marker at the top of the moment -- it is a state of the room, not a
+   secondary detail. */
+.rebuild-waiting {
+  margin: 0;
+  color: var(--accent);
+  font-size: 1.3rem;
+}
+
+.rebuild-old-shape,
+.rebuild-stack {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.rebuild-cell {
+  width: 2.4rem;
+  height: 2.4rem;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  border-radius: 6px;
+}
+
+.rebuild-cell.small {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.rebuild-old-shape.faded {
+  opacity: 0.5;
+}
+
+.rebuild-compare {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.rebuild-new-stacks {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.rebuild-next-action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 1.6rem;
+}
+
+.rebuild-next-role {
+  font-weight: 700;
+}
+
+.rebuild-next-where {
+  color: var(--ok);
+  font-size: 1.1rem;
+}
+
+.rebuild-continue {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 1.3rem;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  border: 2px solid var(--edge);
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+
+/* ---------------- a refused switch --------------------------------------- */
+
+.switch-refusal {
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.refusal-heading {
+  font-size: 2.8rem;
+  margin: 0;
+  max-width: 26ch;
+  color: var(--bad);
+}
+
+.refusal-body,
+.refusal-progress {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 1.3rem;
+  max-width: 60ch;
+}
+
+.refusal-details {
+  color: var(--ink-dim);
+  font-size: 1.1rem;
+}
+
+.refusal-action {
+  font-size: 1.4rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  border: 2px solid var(--edge);
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+
+/* ---------------- players & help / clues found -------------------------- */
+
+.players-help,
+.clues-found {
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+
+/* ---------------- ending ---------------- */
+
+.ending-title {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.ending-sub {
+  font-size: 1.3rem;
+  color: var(--ok);
+  margin: 0;
+  font-weight: 700;
+}
+
+.ending-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 1.1rem;
+}
+
+.ending-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.ending-details {
+  color: var(--ink);
+}
+
+.ending-details-summary {
+  font-size: 1.3rem;
+  color: var(--ink-dim);
+  cursor: pointer;
+  list-style: none;
+}
+
+.ending-details[open] .ending-details-summary {
+  color: var(--ink);
+}
+
+.history {
+  margin: 0;
+  /* No browser marker: the step number is drawn inside the line, where the
+     scroller cannot clip it. See `Ending` in screens.tsx. */
+  list-style: none;
+  padding-left: 0;
+  font-size: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.history-num {
+  display: inline-block;
+  min-width: 2.4ch;
+  margin-right: 0.5rem;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.history-role {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 0.6rem;
+}
+
+.history-switch .history-text {
+  color: var(--ok);
+}
+
+.ending-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.switch-summary {
+  font-size: 1.2rem;
+  color: var(--ink-dim);
+}
+
+.again {
+  align-self: flex-start;
+  font-size: 1.4rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+}
+
+/* ---------------- leaving ---------------- */
+
+.leave {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.leave-title {
+  font-size: 3.6rem;
+  margin: 0;
+}
+
+.leave-sub {
+  font-size: 1.6rem;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 40ch;
+}
+
+.leave-buttons {
+  display: flex;
+  gap: 2rem;
+}
+
+.leave-stay,
+.leave-go {
+  font-size: 1.8rem;
+  padding: 1rem 2.4rem;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+}
+
+.leave-stay {
+  border-color: var(--ok);
+}
+
+/* ---------------- reclaiming, approved on the TV ---------------- */
+
+.reclaim-approval {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.reclaim-approval-title {
+  font-size: 3.2rem;
+  margin: 0;
+}
+
+.reclaim-approval-sub {
+  font-size: 1.6rem;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 40ch;
+}
+
+.reclaim-approval-buttons {
+  display: flex;
+  gap: 2rem;
+}
+
+.reclaim-approval-decline,
+.reclaim-approval-approve {
+  font-size: 1.8rem;
+  padding: 1rem 2.4rem;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+}
+
+.reclaim-approval-approve {
+  border-color: var(--ok);
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@everyone-is-essential/phone",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "The phone controller: private clues and the player's own input mode.",
+  "dependencies": {
+    "preact": "^10.29.8"
+  }
+}

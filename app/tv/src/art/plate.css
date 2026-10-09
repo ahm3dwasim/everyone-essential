@@ -1,0 +1,65 @@
+/**
+ * The painted room AS the screen: a fixed, full-bleed background behind every
+ * surface that shows it (lobby, play, ending), not a picture boxed inside a
+ * panel. The plate was painted for this: every shipped master has an
+ * identical flat dark band filling raster x=800..1279 (measured with PIL:
+ * content ends at x=790..795 on all eleven files) -- a right-hand UI reserve,
+ * not a defect to crop away.
+ *
+ * `object-fit: cover` on a 16:9 master crops symmetrically top/bottom against
+ * a wider-than-16:9 viewport and never crops the sides -- so the reserve's
+ * raster x=800 boundary lands at exactly 62.5% of viewport width (800/1280)
+ * at ANY landscape viewport wide enough to matter, including both the
+ * 1920x1080 output and the Stick's 960x480 Silk CSS viewport. `.rail-shell`
+ * in `styles.css` uses that same 62.5% split.
+ *
+ * No filter and no scrim: the reserve is already flat and dark (measured
+ * luma 26-36 across the whole right column, all three mysteries), so text
+ * placed there needs no dimming. The top/bottom bands over the PAINTING side
+ * are a different story -- measured luma there ranges up to 253 (a lamp's
+ * highlight bleeds into the top band in more than one mystery) -- so no UI
+ * text is ever placed over the painting at all.
+ */
+.plate {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+.plate-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A 700ms crossfade: long enough to read as the room changing, short enough to
+   be over before the next line of the log has been spoken. */
+.plate-in {
+  animation: plate-fade-in 700ms ease-out both;
+}
+
+.plate-out {
+  animation: plate-fade-out 700ms ease-out both;
+}
+
+@keyframes plate-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes plate-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* A viewer who has asked for less motion gets the room, not the crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  .plate-in,
+  .plate-out {
+    animation-duration: 1ms;
+  }
+}

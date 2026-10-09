@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"><title>EIE device bench</title>
+<style>body{background:#111;color:#eee;font:28px/1.4 system-ui;margin:48px}h1{font-size:40px}.ok{color:#7c7}.bad{color:#f77}pre{font-size:22px}</style></head>
+<body><h1>Everyone Is Essential — on-device validator bench</h1><div id="s">running…</div><pre id="o"></pre>
+<script type="module">
+import * as V from "./validator.mjs";
+const out = document.getElementById("o"), st = document.getElementById("s");
+const now = () => performance.now();
+const med = a => { const b=[...a].sort((x,y)=>x-y); return b[Math.floor(b.length/2)]; };
+const r = { ua: navigator.userAgent, cores: navigator.hardwareConcurrency, startedAt: new Date().toISOString() };
+try {
+  let t = now(); const d0 = V.runDemo(); r.firstRunDemoMs = +(now()-t).toFixed(1);
+  r.demoOk = !!(d0 && JSON.stringify(d0).includes('"ok":true'));
+  const runs = []; for (let i=0;i<20;i++){ t=now(); V.runDemo(); runs.push(now()-t); }
+  r.demoMedianMs = +med(runs).toFixed(1); r.demoMaxMs = +Math.max(...runs).toFixed(1);
+  const p = V.demoPuzzle(), s0 = V.emptyState();
+  const cert = []; for (let i=0;i<20;i++){ t=now(); V.certify(p, s0); cert.push(now()-t); }
+  r.certifyMedianMs = +med(cert).toFixed(1);
+  if (performance.memory) r.heapUsedMB = +(performance.memory.usedJSHeapSize/1048576).toFixed(1);
+  r.budgetMs = 2000; r.pass = r.firstRunDemoMs < 2000 && r.demoMaxMs < 2000 && r.demoOk;
+} catch (e) { r.error = String(e && e.stack || e); r.pass = false; }
+r.finishedAt = new Date().toISOString();
+st.innerHTML = r.pass ? '<span class="ok">PASS — within the 2 s budget</span>' : '<span class="bad">FAIL — see details</span>';
+out.textContent = JSON.stringify(r, null, 2);
+fetch("/result", { method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify(r) }).catch(()=>{});
+</script></body></html>

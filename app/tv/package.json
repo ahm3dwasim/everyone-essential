@@ -1,0 +1,11 @@
+{
+  "name": "@everyone-is-essential/tv",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "The TV screen: authoritative game host, 10-foot UI for Fire TV.",
+  "dependencies": {
+    "preact": "^10.29.8",
+    "qrcode-generator": "^2.0.4"
+  }
+}

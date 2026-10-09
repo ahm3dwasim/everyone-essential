@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder banner (art is out of scope here): a plain
+     320x180-ratio rectangle so the LEANBACK_LAUNCHER row has something to
+     show instead of a broken-resource icon. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#1B2430" />
+    <size
+        android:width="320dp"
+        android:height="180dp" />
+</shape>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-test/
+.env
+*.log
+dist-portable/
+test-results/
+playwright-report/
+tools/devicebench/result.json

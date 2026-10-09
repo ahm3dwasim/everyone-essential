@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The embedded server (phone page + relay) and the LAN-address lookup it
+         is built from. No Bluetooth, no location: NetworkInterface needs
+         neither on Fire OS. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:banner="@drawable/banner"
+        android:icon="@drawable/banner"
+        android:label="@string/app_name"
+        android:hardwareAccelerated="true"
+        android:theme="@style/Theme.EveryoneEssential"
+        android:usesCleartextTraffic="true">
+        <!-- targetSdk 34 defaults usesCleartextTraffic to false, which would
+             block the app's own http:// (phone page) and ws:// (relay) traffic
+             to itself even though the target device (API 25) never enforced
+             that default. The embedded server never leaves the LAN. -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@style/Theme.EveryoneEssential">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

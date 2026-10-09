@@ -1,0 +1,10 @@
+{
+  "name": "@everyone-is-essential/relay",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Room relay: forwards messages between the TV and the phones on the LAN.",
+  "dependencies": {
+    "ws": "^8.21.3"
+  }
+}

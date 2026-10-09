@@ -1,0 +1,8 @@
+local.properties
+.gradle/
+build/
+app/build/
+app/src/main/assets/tv/
+app/src/main/assets/phone/
+*.iml
+.idea/

@@ -1,0 +1,198 @@
+{
+  "id": "the-lighthouse-braid-7",
+  "title": "The Dark Lighthouse",
+  "subtitle": "A couch mystery, and the lamp stays out until everyone has spoken.",
+  "opening": "The lamp went out at dusk. The stair is dark and the log book is missing.",
+  "roles": [
+    "A",
+    "B",
+    "C"
+  ],
+  "headline": {
+    "role": "C",
+    "capabilities": [
+      "scan"
+    ]
+  },
+  "puzzle": {
+    "id": "the-lighthouse-braid-7",
+    "roles": [
+      {
+        "id": "A",
+        "capabilities": [
+          "dpad"
+        ],
+        "privateTokens": [
+          "keeper_log_page"
+        ]
+      },
+      {
+        "id": "B",
+        "capabilities": [
+          "voice"
+        ],
+        "privateTokens": [
+          "foghorn_pattern"
+        ]
+      },
+      {
+        "id": "C",
+        "capabilities": [
+          "dpad"
+        ],
+        "privateTokens": [
+          "oil_drum_label"
+        ]
+      }
+    ],
+    "primitives": [
+      {
+        "id": "dpad.grid",
+        "capability": "dpad",
+        "maxOptions": 9,
+        "splittable": false,
+        "label": "3x3 d-pad grid"
+      },
+      {
+        "id": "dpad.button",
+        "capability": "dpad",
+        "maxOptions": 1,
+        "splittable": false,
+        "label": "single d-pad press"
+      },
+      {
+        "id": "scan.paged",
+        "capability": "scan",
+        "maxOptions": 4,
+        "splittable": true,
+        "label": "switch-scan paged list"
+      },
+      {
+        "id": "voice.confirm",
+        "capability": "voice",
+        "maxOptions": 1,
+        "splittable": false,
+        "label": "spoken confirmation"
+      }
+    ],
+    "goalFlags": [
+      "lamp_lit"
+    ],
+    "actions": [
+      {
+        "id": "a_read",
+        "performer": "A",
+        "needs": "dpad",
+        "requiresTokens": [
+          "keeper_log_page"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [
+          "a_fact"
+        ],
+        "setsFlags": [],
+        "label": "read the torn log page (the torn page from the keeper's log)"
+      },
+      {
+        "id": "a_work",
+        "performer": "A",
+        "needs": "dpad",
+        "requiresTokens": [
+          "a_fact",
+          "c_fact"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [
+          "a_part"
+        ],
+        "setsFlags": [],
+        "options": 4,
+        "answerToken": "c_fact",
+        "label": "fit the lens into its cradle (4 settings marked)"
+      },
+      {
+        "id": "b_read",
+        "performer": "B",
+        "needs": "voice",
+        "requiresTokens": [
+          "foghorn_pattern"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [
+          "b_fact"
+        ],
+        "setsFlags": [],
+        "label": "call out the foghorn pattern (the foghorn pattern chalked by the door)"
+      },
+      {
+        "id": "b_work",
+        "performer": "B",
+        "needs": "voice",
+        "requiresTokens": [
+          "b_fact",
+          "a_fact"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [
+          "b_part"
+        ],
+        "setsFlags": [],
+        "options": 4,
+        "answerToken": "a_fact",
+        "label": "read the tide table aloud (4 settings marked)"
+      },
+      {
+        "id": "c_read",
+        "performer": "C",
+        "needs": "dpad",
+        "requiresTokens": [
+          "oil_drum_label"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [
+          "c_fact"
+        ],
+        "setsFlags": [],
+        "label": "read the oil drum label (the label on the oil drum)"
+      },
+      {
+        "id": "c_work",
+        "performer": "C",
+        "needs": "dpad",
+        "requiresTokens": [
+          "c_fact",
+          "b_fact"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [
+          "c_part"
+        ],
+        "setsFlags": [],
+        "options": 4,
+        "answerToken": "b_fact",
+        "label": "trim the spare wick (4 settings marked)"
+      },
+      {
+        "id": "a_finish",
+        "performer": "A",
+        "needs": "dpad",
+        "requiresTokens": [
+          "a_part",
+          "b_part",
+          "c_part",
+          "keeper_log_page",
+          "foghorn_pattern",
+          "oil_drum_label"
+        ],
+        "requiresFlags": [],
+        "producesTokens": [],
+        "setsFlags": [
+          "lamp_lit"
+        ],
+        "options": 4,
+        "answerToken": "c_part",
+        "label": "light the lamp and bring the beam back round (4 ways to try)"
+      }
+    ]
+  }
+}

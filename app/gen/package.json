@@ -1,0 +1,8 @@
+{
+  "name": "@everyone-is-essential/gen",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "The mystery generator: a model proposes, the compiler decides. Proposals only ever reach players through the frozen validator's gate.",
+  "dependencies": {}
+}

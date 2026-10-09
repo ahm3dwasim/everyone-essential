@@ -1,0 +1,54 @@
+{
+  "name": "everyone-is-essential",
+  "private": true,
+  "version": "0.0.1",
+  "description": "A couch co-op mystery game where every player is provably necessary, even after someone's input mode changes mid-game.",
+  "type": "module",
+  "workspaces": [
+    "app/tv",
+    "app/phone",
+    "app/relay",
+    "app/gen"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "npm run build:tv && npm run build:phone",
+    "build:tv": "vite build --config app/tv/vite.config.ts",
+    "build:phone": "vite build --config app/phone/vite.config.ts",
+    "gen": "vite-node app/gen/src/cli.ts",
+    "sizes": "node scripts/sizes.mjs",
+    "build:devicebench": "node tools/devicebench/build-validator.mjs",
+    "check:devicebench": "node tools/devicebench/build-validator.mjs --check",
+    "relay": "node app/relay/src/main.ts",
+    "tv": "node scripts/serve.mjs",
+    "serve": "node scripts/serve.mjs",
+    "smoke": "npm run build && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^26.6.2",
+    "@types/ws": "^8.18.1",
+    "esbuild": "0.28.2",
+    "fake-indexeddb": "^6.2.5",
+    "preact": "^10.29.8",
+    "preact-render-to-string": "^6.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahm3dwasim/everyone-essential.git"
+  },
+  "homepage": "https://github.com/ahm3dwasim/everyone-essential#readme",
+  "bugs": {
+    "url": "https://github.com/ahm3dwasim/everyone-essential/issues"
+  }
+}
